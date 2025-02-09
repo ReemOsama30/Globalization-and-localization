@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.Extensions.Options;
+using System.Globalization;
+
 namespace Globalization_and_localization
 {
     public class Program
@@ -8,6 +13,21 @@ namespace Globalization_and_localization
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddLocalization(options=>options.ResourcesPath="Resource");
+            builder.Services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
+            builder.Services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportCulture = new[] {
+                 new CultureInfo("ar-EG"),
+                 new CultureInfo("en")
+                
+                
+                };
+                options.DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en");
+                options.SupportedCultures = supportCulture;
+                options.SupportedUICultures = supportCulture;
+                options.RequestCultureProviders.Insert(0, new QueryStringRequestCultureProvider());
+            });
 
             var app = builder.Build();
 
@@ -21,7 +41,8 @@ namespace Globalization_and_localization
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+        var locOptions= app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
+        
             app.UseRouting();
 
             app.UseAuthorization();
